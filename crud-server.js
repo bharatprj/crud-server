@@ -1,10 +1,11 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-var mongo = require("mongoose");
+// var mongo = require("mongoose");
 var app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
 //allowig cross origin, headers, Methods  
 app.use(function (req, res, next) {

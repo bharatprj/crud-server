@@ -5,7 +5,8 @@ var verifyToken = function(req, res, next) {
     if (!req.headers.authorization) {
         return res.status(401).send('unauthorized request');
     }
-    let token = req.headers.authorization.split(' ')[1];
+    let token =  req.headers.authorization.split(' ')[1];
+    token = token === "null"?null:token;
     if (token === null) {
         return res.status(401).send('unauthorized token');
     }
