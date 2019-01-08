@@ -4,6 +4,7 @@ const router = express.Router();
 var model = require('../collections/user-model');
 const jwt = require('jsonwebtoken');
 const verifyToken = require('../middlewares/token.verifier');
+var sendResetMail = require('../middlewares/send-mail');
 var multer = require('multer');
 
 var storage = multer.diskStorage({
@@ -34,7 +35,7 @@ router.post("/api/user/signup", upload.single('image'), function (req, res) {
 });
 
 
-// update Info
+// update user data
 router.put('/api/user/update', verifyToken, upload.single('image'), function (req, res) {
     userModel.findByIdAndUpdate(req.query._id, req.body, { new: false }, function (err, data) {
         if (err) {
@@ -63,7 +64,7 @@ router.get("/api/user/signin", function (req, res) {
             let token = jwt.sign(payload, 'secretKey');
             let file = data[0].image;
             fs.readFile(process.cwd() + "\\" + file, 'base64', (err, base64Image) => {
-                var bitmap = `data:image/jpeg;base64, ${base64Image}`;
+                var bitmap = `data:image/jpeg;base64,${base64Image}`;
                 response = { ...data[0] };
                 response._doc.image = bitmap;
                 res.status(200).send({ token: token, userinfo: response._doc });
@@ -71,7 +72,6 @@ router.get("/api/user/signin", function (req, res) {
             );
             // var bitmap = fs.readFileSync(process.cwd()+"\\"+file);
             // let s = new Buffer(bitmap).toString('base64');
-
             // let s = fs.createReadStream(ex+"\\"+file);
             // s.pipe(res);
         }
@@ -112,18 +112,13 @@ router.delete('/api/user/remove', verifyToken, function (req, res) {
     });
 });
 
+ // sending mail for password reset
+ router.get("/api/user/forgotPassword",sendResetMail, (req, res) =>{
+    if(req.err){
+        res.status(403).send('mail sending error');
+    }
+    else{res.status(200).send('success');}
 
-router.post("/api/user/uploadimage", upload.single('image'), function (req, res, next) {
-    var mod = new userModel(req.body);
-    mod.save(function (err, data) {
-        if (err) {
-            res.status(500).send(err);
-        }
-        else {
-            res.status(200).send({ data: "record has been inserted..!!" });
-        }
-    });
 });
-
 
 module.exports = router;
